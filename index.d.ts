@@ -1,8 +1,15 @@
-import { ConvertData } from './src/util/covertData';
+import { ConvertData } from './src/util/convertData';
 
 export type TResponse = {
-  [timestamp: string]: IData;
+  areaDate: {
+    [timestamp: string]: {
+      id: string;
+      value_area: number;
+      value_bar: number;
+    };
+  };
 };
+type AreaDateResponse = Array<string | []>;
 
 export type TJson = {
   type: string;
@@ -16,6 +23,7 @@ export interface Props {
   children: React.ReactNode;
   convertData: ConvertData;
 }
+
 export interface IData {
   id: string;
   value_area: number;
