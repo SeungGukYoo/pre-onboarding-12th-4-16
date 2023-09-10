@@ -6,7 +6,7 @@ export const AreaStoreContext = createContext<TResponse | null>(null);
 export const useAreaData = () => useContext(AreaStoreContext);
 
 export function AreaStoreProvider({ children, convertData }: Props) {
-  const [areaDatas, setAreaDatas] = useState({});
+  const [areaDatas] = useState({});
 
   useEffect(() => {
     const callData = async () => {
