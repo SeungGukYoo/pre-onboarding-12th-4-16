@@ -1,14 +1,13 @@
 import { ConvertData } from './src/util/convertData';
 
 export type TResponse = {
-  areaDate: {
-    [timestamp: string]: {
-      id: string;
-      value_area: number;
-      value_bar: number;
-    };
+  [timestamp: string]: {
+    id: string;
+    value_area: number;
+    value_bar: number;
   };
 };
+
 type AreaDateResponse = Array<string | []>;
 
 export type TJson = {
