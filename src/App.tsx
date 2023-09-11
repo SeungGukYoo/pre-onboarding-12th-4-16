@@ -1,77 +1,69 @@
-import { ChartData, CoreChartOptions, ElementChartOptions } from 'chart.js';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Chart, Line } from 'react-chartjs-2';
-import { useAreaData } from './context/areaStoreContext';
+import { ChartData, ChartOptions } from 'chart.js';
+
+import { Chart } from 'react-chartjs-2';
+import useChartData from './hook/useChartData';
 
 function App() {
-  const chartRef = useRef(null);
+  const { makeChart, labels, printTooltip } = useChartData();
 
-  const { areaDate } = useAreaData();
-  const [Labels, setLabels] = useState([]);
-  const [BarDatas, setBarDatas] = useState([]);
-  const [AreaDatas, setAreaDatas] = useState([]);
-  const [IdDatas, setIdDatas] = useState([]);
-  useEffect(() => {
-    const label = [];
-    const barData = [];
-    const areaData = [];
-    const IdData = [];
-    for (const area in areaDate) {
-      label.push(area.split(' ')[1]);
-      barData.push(areaDate[area].value_bar);
-      areaData.push(areaDate[area].value_area);
-      IdData.push(areaDate[area].id);
-    }
-    setLabels(label);
-    setBarDatas(barData);
-    setAreaDatas(areaData);
-    setIdDatas(IdData);
-  }, [areaDate]);
+  const barDataSets = makeChart('bar');
+  const areaDataSets = makeChart('line');
+  // const barOptions = makeOption(barDataSets.yAxisID, 'bar');
+  // const areaOptions = makeOption(areaDataSets.yAxisID, 'line');
+  // const data = {
+  //   type: 'bar',
+  //   data: barDataSets,
+  //   // datasets: [],
+  // };
+  // const data: DataSetsStroctur = {
+  //   labels: labels,
+  //   datasets: [barDataSets],
+  //   // datasets: [],
+  // };
 
-  const data = {
-    labels: Labels,
+  const datas: ChartData<'bar' | 'line', number[], unknown> = {
+    labels: labels,
     datasets: [
       {
-        label: 'BAR value',
-        type: 'bar' as const,
-        data: BarDatas,
-        borderWidth: 1,
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        yAxisID: 'y1',
+        type: 'bar',
+        label: barDataSets.label,
+        data: barDataSets.data as number[],
+        backgroundColor: barDataSets.backgroundColor,
+        borderColor: barDataSets.borderColor,
+        borderWidth: barDataSets.borderWidth,
+        yAxisID: barDataSets.yAxisID,
       },
       {
-        label: 'AREA value',
-        type: 'line' as const,
-        data: AreaDatas,
-        borderWidth: 1,
-        backgroundColor: 'rgba(75, 192, 192, 0.5)',
-        borderColor: 'rgba(75, 192, 192, 1)',
+        type: 'line',
+        label: areaDataSets.label,
+        data: areaDataSets.data as number[],
+        backgroundColor: areaDataSets.backgroundColor,
+        borderColor: areaDataSets.borderColor,
+        borderWidth: areaDataSets.borderWidth,
+        yAxisID: areaDataSets.yAxisID,
         fill: true,
-        yAxisID: 'y2',
       },
     ],
   };
-  const options = {
+
+  const options: ChartOptions<'bar' | 'line'> = {
     scales: {
-      y1: {
-        beginAtZero: true,
-        position: 'left',
-        min: 0,
-        max: 20000,
-      },
-      y2: {
-        beginAtZero: true,
-        position: 'right',
+      areaValue: {
         min: 0,
         max: 200,
+        position: 'right',
       },
     },
+    // scales: {
+    //   barOptions,
+    //   areaOptions,
+    // },
     plugins: {
       tooltip: {
         callbacks: {
           title: context => {
-            const title = IdDatas[context[0].dataIndex];
+            if (!context[0].dataset.type) return '';
+            const title = printTooltip(context[0].dataIndex, context[0].dataset.type);
             return title;
           },
         },
@@ -79,12 +71,16 @@ function App() {
     },
   };
 
+  // const onClick = event => {
+  //   console.log(getElementAtEvent(chartRef.current, event));
+  // };
+
   return (
     <>
       <h1 className="text-red-400">react start</h1>
 
       <div className="max-w-[1024px]">
-        <Chart type="bar" ref={chartRef} data={data} options={options} />
+        <Chart type="bar" data={datas} options={options} />
       </div>
     </>
   );
