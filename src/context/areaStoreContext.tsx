@@ -6,24 +6,42 @@ interface convertData {
   labels: string[] | [];
   bar: number[] | [];
   area: number[] | [];
+  barColor: string[] | [];
 }
 
 interface contextType {
   areaData: convertData;
+  changeColor: (areaName: string, colorData: string[]) => void;
+  currentFocusLocation: string;
 }
+
+type FoucsLocation = 'none' | string;
 
 export const AreaStoreContext = createContext<contextType | null>(null);
 
-export const useAreaData = () => useContext(AreaStoreContext);
+export const useAreaData = () => {
+  const context = useContext(AreaStoreContext);
+  if (!context) throw new Error('useContext must be a provider');
+  return context;
+};
 
 export function AreaStoreProvider({ children, convertData }: Props) {
+  const [currentFocusLocation, setCurrentFocusLocation] = useState<FoucsLocation>('none');
   const [areaData, setAreaData] = useState<convertData>({
     id: [],
     labels: [],
     bar: [],
     area: [],
+    barColor: [],
   });
 
+  const changeColor = (areaName: string, colorData: string[]) => {
+    setAreaData(prev => ({
+      ...prev,
+      barColor: [...prev.barColor, ...colorData],
+    }));
+    setCurrentFocusLocation(areaName);
+  };
   useEffect(() => {
     const callData = async () => {
       const result = await convertData.getData('mock.json');
@@ -32,11 +50,15 @@ export function AreaStoreProvider({ children, convertData }: Props) {
         labels: [...pre.labels, ...result.labels],
         bar: [...pre.bar, ...result.bar],
         area: [...pre.area, ...result.area],
+        barColor: [...pre.barColor, ...result.barColor],
       }));
     };
     callData();
   }, [convertData]);
-  console.log(areaData);
 
-  return <AreaStoreContext.Provider value={{ areaData }}>{children}</AreaStoreContext.Provider>;
+  return (
+    <AreaStoreContext.Provider value={{ areaData, changeColor, currentFocusLocation }}>
+      {children}
+    </AreaStoreContext.Provider>
+  );
 }
