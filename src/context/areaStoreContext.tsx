@@ -1,27 +1,42 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import type { IData, Props, TResponse } from '../..';
+import type { Props } from '../..';
 
-interface remakeData {
-  [name: string]: IData;
+interface convertData {
+  id: string[] | [];
+  labels: string[] | [];
+  bar: number[] | [];
+  area: number[] | [];
 }
 
-export const AreaStoreContext = createContext<TResponse | null>(null);
+interface contextType {
+  areaData: convertData;
+}
+
+export const AreaStoreContext = createContext<contextType | null>(null);
 
 export const useAreaData = () => useContext(AreaStoreContext);
 
 export function AreaStoreProvider({ children, convertData }: Props) {
-  const [areaDate, setAreaDate] = useState<remakeData>({});
+  const [areaData, setAreaData] = useState<convertData>({
+    id: [],
+    labels: [],
+    bar: [],
+    area: [],
+  });
 
   useEffect(() => {
     const callData = async () => {
-      const result = await convertData.getAreaData('mock.json');
-      setAreaDate(pre => {
-        pre = result;
-        return pre;
-      });
+      const result = await convertData.getData('mock.json');
+      setAreaData(pre => ({
+        id: [...pre.id, ...result.id],
+        labels: [...pre.labels, ...result.labels],
+        bar: [...pre.bar, ...result.bar],
+        area: [...pre.area, ...result.area],
+      }));
     };
     callData();
   }, [convertData]);
+  console.log(areaData);
 
-  return <AreaStoreContext.Provider value={{ areaDate }}>{children}</AreaStoreContext.Provider>;
+  return <AreaStoreContext.Provider value={{ areaData }}>{children}</AreaStoreContext.Provider>;
 }
