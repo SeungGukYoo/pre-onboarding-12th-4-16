@@ -1,8 +1,15 @@
+import { JsonType } from './index.d';
 export interface Props {
   children: React.ReactNode;
   convertData: ConvertData;
 }
 export type FoucsLocation = 'none' | string;
+
+export interface JsonType {
+  type: string;
+  version: number;
+  response: TResponse;
+}
 
 export type TResponse = {
   [timestamp: string]: {
@@ -37,7 +44,7 @@ export type TDataObj = {
 };
 
 export interface IConvertData {
-  getData(path: string): Promise<TDataObj>;
+  getData(jsonData: JsonType): TDataObj;
 }
 
 export type TJson = {
@@ -48,9 +55,7 @@ export type TJson = {
   };
 };
 
-export type ParsedJson = {
-  response: TResponse;
-};
+export type ParsedJson = TResponse;
 
 export interface convertData {
   id: string[];

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { FoucsLocation, IColorDatas, Props, contextType, convertData } from '../..';
-
+import mockData from '../assets/mock.json';
 export const AreaStoreContext = createContext<contextType | null>(null);
 
 export const useAreaData = () => {
@@ -32,8 +32,8 @@ export function AreaStoreProvider({ children, convertData }: Props) {
     setCurrentFocusLocation(areaName);
   };
   useEffect(() => {
-    const callData = async () => {
-      const result = await convertData.getData('mock.json');
+    const callData = () => {
+      const result = convertData.getData(mockData);
       setAreaData(pre => ({
         id: [...pre.id, ...result.id],
         labels: [...pre.labels, ...result.labels],

@@ -1,4 +1,4 @@
-import { IConvertData, ParsedJson, TDataObj, TResponse } from '../..';
+import { IConvertData, JsonType, ParsedJson, TDataObj, TResponse } from '../..';
 
 export class ConvertData implements IConvertData {
   #defaultBarColor: string;
@@ -9,12 +9,9 @@ export class ConvertData implements IConvertData {
     this.#defaultLineColor = 'rgba(75, 192, 192, 0.7)';
     this.#defaultLineBorderColor = 'rgba(75, 192, 192, 0.7)';
   }
-  async getData(path: string) {
-    const response = await fetch(`/data/${path}`);
-    const json: ParsedJson = await response.json();
-
-    const result = this.convertDataStructor(json.response);
-
+  getData(jsonData: JsonType) {
+    const json: ParsedJson = jsonData.response;
+    const result = this.convertDataStructor(json);
     return result;
   }
 
