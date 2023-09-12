@@ -1,30 +1,64 @@
+import { IColorDatas, IbarDefaultChart, IlineDefaultChart, makeDataSets } from '../..';
 import { useAreaData } from '../context/areaStoreContext';
 
+const noneFilteringBarColor = 'rgba(255, 99, 132, 0.2)';
+const focusFilteringBarColor = 'rgba(255, 99, 132, 1)';
+const noneFilteringLineColor = 'rgba(75, 192, 192, 0.7)';
+const focusFilteringLineColor = 'rgba(0, 0, 0, 0.7)';
+const lineDefaultChart: IlineDefaultChart = {
+  type: 'line',
+  label: 'Line Value',
+  data: [],
+  backgroundColor: [noneFilteringLineColor],
+  borderWidth: 1,
+  yAxisID: 'lineValue',
+  pointStyle: 'circle',
+  pointBackgroundColor: noneFilteringLineColor,
+  pointBorderColor: [],
+  order: 1,
+  fill: true,
+};
+const barDefaultChart: IbarDefaultChart = {
+  type: 'bar',
+  label: 'Area Value',
+  data: [],
+  backgroundColor: [],
+  borderWidth: 1,
+  yAxisID: 'areaValue',
+  order: 2,
+};
+
 function useChartData() {
-  const { areaData, changeColor, currentFocusLocation } = useAreaData();
+  const { areaData, colorDatas, changeColor, currentFocusLocation } = useAreaData();
   const labels = areaData?.labels;
+  const Location = [...new Set(areaData?.id)];
 
-  const makeChart = (type: 'bar' | 'line') => {
-    const defaultChart = {
-      label: 'BAR VALUE',
-      data: areaData?.bar,
-      borderWidth: 1,
-      backgroundColor: areaData?.barColor,
-      borderColor: 'rgba(255, 99, 132, 1)',
-      yAxisID: 'barValue',
-    };
-
-    if (type === 'line') {
-      defaultChart.label = 'AREA VALUE';
-      defaultChart.data = areaData?.area;
-      defaultChart.borderWidth = 1;
-
-      defaultChart.backgroundColor = ['rgba(75, 192, 192, 0.7)'];
-      defaultChart.borderColor = 'rgba(75, 192, 192, 1)';
-      defaultChart.yAxisID = 'areaValue';
+  const switchFnc = (type: string) => {
+    switch (type) {
+      case 'bar': {
+        const defaultDataset = barDefaultChart;
+        defaultDataset.data = areaData?.bar;
+        defaultDataset.backgroundColor = colorDatas.barColor;
+        return defaultDataset;
+      }
+      case 'line': {
+        const defaultDataset = lineDefaultChart;
+        defaultDataset.data = areaData?.area;
+        defaultDataset.backgroundColor = colorDatas.lineColor;
+        defaultDataset.pointBorderColor = colorDatas.borderColor;
+        return defaultDataset;
+      }
+      default:
+        throw new Error('지원하지 않은 차트입니다.');
     }
+  };
 
-    return defaultChart;
+  const makeChartDataSets: makeDataSets = (types: string[]) => {
+    const results = types.map(type => {
+      const result = switchFnc(type);
+      return result;
+    });
+    return results;
   };
 
   const printTooltip = (index: number, type: 'bar' | 'line') => {
@@ -34,33 +68,35 @@ function useChartData() {
     return message;
   };
 
-  const Location = [...new Set(areaData?.id)];
-
   const getClickIndex = (index: number) => {
     if (!index) return;
     filtering(areaData.id[index]);
   };
+
   const filtering = (areaName: string) => {
+    const prevAreaData: IColorDatas = Object.assign(colorDatas);
+
     if (currentFocusLocation === areaName) {
-      const newAnswer = areaData?.id.map((data, index) => {
-        areaData.barColor[index] = 'rgba(255, 99, 132, 0.2)';
-        return data;
+      labels.forEach((_, index) => {
+        prevAreaData.barColor[index] = noneFilteringBarColor;
+        prevAreaData.borderColor[index] = noneFilteringLineColor;
       });
-      if (newAnswer && changeColor) changeColor(areaName, newAnswer);
+      areaName = 'none';
     } else {
-      const newAnswer = areaData?.id.map((data, index) => {
-        if (data === areaName) {
-          areaData.barColor[index] = 'rgba(255, 99, 132, 1)';
+      areaData.id.forEach((name, index) => {
+        if (name === areaName) {
+          prevAreaData.barColor[index] = focusFilteringBarColor;
+          prevAreaData.borderColor[index] = focusFilteringLineColor;
         } else {
-          areaData.barColor[index] = 'rgba(255, 99, 132, 0.2)';
+          prevAreaData.barColor[index] = noneFilteringBarColor;
+          prevAreaData.borderColor[index] = noneFilteringLineColor;
         }
-        return data;
       });
-      if (newAnswer && changeColor) changeColor(areaName, newAnswer);
     }
+    changeColor && changeColor(areaName, prevAreaData);
   };
 
-  return { labels, printTooltip, makeChart, Location, filtering, getClickIndex };
+  return { labels, printTooltip, Location, filtering, getClickIndex, makeChartDataSets };
 }
 
 export default useChartData;
