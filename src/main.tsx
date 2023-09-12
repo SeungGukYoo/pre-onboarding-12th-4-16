@@ -9,7 +9,7 @@ import {
   PointElement,
   Title,
   Tooltip,
-} from 'chart.js';
+} from 'chart.js/auto';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 
