@@ -4,41 +4,18 @@ import { Chart, getElementAtEvent } from 'react-chartjs-2';
 import useChartData from './hook/useChartData';
 
 function App() {
-  const { makeChart, labels, printTooltip, Location, filtering, getClickIndex } = useChartData();
+  const { labels, printTooltip, Location, filtering, getClickIndex, makeChartDataSets } =
+    useChartData();
   const chartRef = useRef(null);
-  const barDataSets = makeChart('bar');
-  const areaDataSets = makeChart('line');
+  const makeDataSets = makeChartDataSets(['bar', 'line']).map(dataset => Object.assign(dataset));
 
   const datas: ChartData<'bar' | 'line', number[], unknown> = {
     labels: labels,
-    datasets: [
-      {
-        type: 'bar',
-        label: barDataSets.label,
-        data: barDataSets.data as number[],
-        backgroundColor: barDataSets.backgroundColor,
-        borderColor: barDataSets.borderColor,
-        borderWidth: barDataSets.borderWidth,
-        yAxisID: barDataSets.yAxisID,
-        order: 2,
-      },
-      {
-        type: 'line',
-        label: areaDataSets.label,
-        data: areaDataSets.data as number[],
-        backgroundColor: areaDataSets.backgroundColor,
-        borderColor: areaDataSets.borderColor,
-        borderWidth: areaDataSets.borderWidth,
-        yAxisID: areaDataSets.yAxisID,
-        pointStyle: false,
-        order: 1,
-        fill: true,
-      },
-    ],
+    datasets: makeDataSets,
   };
   const options: ChartOptions<'bar' | 'line'> = {
     scales: {
-      areaValue: {
+      lineValue: {
         min: 0,
         max: 200,
         position: 'right',
@@ -57,17 +34,20 @@ function App() {
     },
   };
   const filterDataClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (chartRef.current) {
-      const clickDataIndex = getElementAtEvent(chartRef.current, e)[0].index;
-      getClickIndex(clickDataIndex);
-    }
+    if (!chartRef.current) return;
+    const clickDataIndex = getElementAtEvent(chartRef.current, e)[0]?.index;
+    getClickIndex(clickDataIndex);
   };
   return (
     <>
       <h1 className="text-red-400">react start</h1>
-      {Location.map((areaName, idx) => {
+      {Location.map(areaName => {
         return (
-          <button className="border mx-2 px-4 py-2" key={idx} onClick={() => filtering(areaName)}>
+          <button
+            className="border mx-2 px-4 py-2"
+            key={areaName}
+            onClick={() => filtering(areaName)}
+          >
             {areaName}
           </button>
         );

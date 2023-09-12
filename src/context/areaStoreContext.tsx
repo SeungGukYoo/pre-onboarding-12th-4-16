@@ -1,21 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import type { Props } from '../..';
-
-interface convertData {
-  id: string[] | [];
-  labels: string[] | [];
-  bar: number[] | [];
-  area: number[] | [];
-  barColor: string[] | [];
-}
-
-interface contextType {
-  areaData: convertData;
-  changeColor: (areaName: string, colorData: string[]) => void;
-  currentFocusLocation: string;
-}
-
-type FoucsLocation = 'none' | string;
+import type { FoucsLocation, IColorDatas, Props, contextType, convertData } from '../..';
 
 export const AreaStoreContext = createContext<contextType | null>(null);
 
@@ -32,14 +16,19 @@ export function AreaStoreProvider({ children, convertData }: Props) {
     labels: [],
     bar: [],
     area: [],
-    barColor: [],
   });
-
-  const changeColor = (areaName: string, colorData: string[]) => {
-    setAreaData(prev => ({
+  const [colorDatas, setColorDatas] = useState<IColorDatas>({
+    barColor: [],
+    lineColor: [],
+    borderColor: [],
+  });
+  const changeColor = (areaName: string, colorData: IColorDatas) => {
+    setColorDatas(prev => ({
       ...prev,
-      barColor: [...prev.barColor, ...colorData],
+      barColor: [...colorData.barColor],
+      borderColor: [...colorData.borderColor],
     }));
+
     setCurrentFocusLocation(areaName);
   };
   useEffect(() => {
@@ -50,14 +39,18 @@ export function AreaStoreProvider({ children, convertData }: Props) {
         labels: [...pre.labels, ...result.labels],
         bar: [...pre.bar, ...result.bar],
         area: [...pre.area, ...result.area],
+      }));
+      setColorDatas(pre => ({
         barColor: [...pre.barColor, ...result.barColor],
+        lineColor: [...pre.barColor, ...result.lineColor],
+        borderColor: [...pre.barColor, ...result.lineColor],
       }));
     };
     callData();
   }, [convertData]);
 
   return (
-    <AreaStoreContext.Provider value={{ areaData, changeColor, currentFocusLocation }}>
+    <AreaStoreContext.Provider value={{ areaData, changeColor, currentFocusLocation, colorDatas }}>
       {children}
     </AreaStoreContext.Provider>
   );
