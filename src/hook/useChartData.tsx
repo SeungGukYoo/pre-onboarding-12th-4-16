@@ -7,7 +7,7 @@ const noneFilteringLineColor = 'rgba(75, 192, 192, 0.7)';
 const focusFilteringLineColor = 'rgba(0, 0, 0, 0.7)';
 const lineDefaultChart: IlineDefaultChart = {
   type: 'line',
-  label: 'Line Value',
+  label: 'AREA Value',
   data: [],
   backgroundColor: [noneFilteringLineColor],
   borderWidth: 1,
@@ -20,7 +20,7 @@ const lineDefaultChart: IlineDefaultChart = {
 };
 const barDefaultChart: IbarDefaultChart = {
   type: 'bar',
-  label: 'Area Value',
+  label: 'BAR Value',
   data: [],
   backgroundColor: [],
   borderWidth: 1,
@@ -30,6 +30,7 @@ const barDefaultChart: IbarDefaultChart = {
 
 function useChartData() {
   const { areaData, colorDatas, changeColor, currentFocusLocation } = useAreaData();
+
   const labels = areaData?.labels;
   const Location = [...new Set(areaData?.id)];
 
@@ -96,7 +97,15 @@ function useChartData() {
     changeColor && changeColor(areaName, prevAreaData);
   };
 
-  return { labels, printTooltip, Location, filtering, getClickIndex, makeChartDataSets };
+  return {
+    labels,
+    printTooltip,
+    Location,
+    filtering,
+    getClickIndex,
+    makeChartDataSets,
+    currentFocusLocation,
+  };
 }
 
 export default useChartData;
